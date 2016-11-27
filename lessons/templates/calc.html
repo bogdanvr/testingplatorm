@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<h1>Услуги</h1>
+{{ now }}
+<br>
+<br>
+{% for i in uslugi %}
+
+<ul>
+    <li class="calcutt">{{ i.title }} - {{ i.price }} р.  <button class="calcutta">Добавить</button></li>
+
+</ul>
+
+<div id="output">
+    <div class="ajaxProgress">
+        <h3>Please Wait</h3>
+
+    </div>
+</div>
+
+{% endfor %}
+
+<ul class="dmw">
+
+</ul>
+
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'lessons/load_calc.js' %}"></script>
+{% endblock %}

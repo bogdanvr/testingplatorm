@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<a href="{% url 'lesson' problem.lesson.id %}">Урок {{ problem.lesson.id }}: {{ problem.lesson.title }}</a>
+
+<h1>Задача "{{ problem.title }}"</h1>
+
+{{ problem.statement|safe }}
+
+<form action="{% url 'send_submission' problem.id %}" method="post">
+    {% csrf_token %}
+    <textarea name="source" cols="100" rows="10">
+def action(...):
+    return ...
+    </textarea>
+    <input type="submit" class="button" value="Загрузить таблицу">
+</form>
+<input type="submit" class="button" value="Отправить на проверку">
+<table id="submissions" border="1">
+</table>
+<input type="hidden" id="problem_id" value="{{ problem.id }}">
+
+<a href="{% url 'calc' %}">Калькулятор</a>
+
+<button id="webus">web</button>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'lessons/jquery.js' %}"></script>
+<script src="{% static 'lessons/load_submissions.js' %}"></script>
+{% endblock %}

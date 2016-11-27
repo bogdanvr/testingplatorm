@@ -1,0 +1,117 @@
+
+import json
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django.contrib.auth.forms import UserCreationForm
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+from lessons.models import Lesson, Problem, Uslugi, SubUslugi
+from lessons.submission_testing import test_submission
+from django.template.loader import render_to_string
+import datetime
+from django.core import serializers
+
+
+def index(request):
+    lessons = Lesson.objects.all()
+    return render(request, 'index.html', {'lessons': lessons})
+
+
+def lesson(request, lesson_id):
+    lesson = Lesson.objects.get(id=lesson_id)
+    return render(request, 'lesson.html', {'lesson': lesson})
+
+
+@login_required(login_url='/login')
+def problem(request, problem_id):
+    problem = Problem.objects.get(id=problem_id)
+    tests = problem.test_set.order_by('number')
+    return render(request, 'problem.html', {'problem': problem, 'tests': tests})
+
+
+@login_required
+def send_submission(request, problem_id):
+    problem = Problem.objects.get(id=problem_id)
+    source = request.POST['source']
+    test_submission(problem, source, request.user)
+    return redirect('problem', problem_id=problem.id)
+
+
+def load_submissions(request):
+    '''
+    Ajax request.
+
+    Params:
+        problem_id
+
+    Return: {
+        'submissions': ...
+    }
+    '''
+    problem = Problem.objects.get(id=int(request.GET['problem_id']))
+    submissions_json = [s.as_dict() for s in problem.submission_set.all()]
+    response_data = {
+        'submissions': submissions_json
+    }
+
+    return HttpResponse(json.dumps(response_data),
+                        content_type="application/json")
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            new_user = form.save()
+            return HttpResponseRedirect("/")
+    else:
+        form = UserCreationForm()
+    return render(request, "register.html", {
+        'form': form,
+    })
+
+def calcview(request):
+    uslugi = Uslugi.objects.all()[:5]
+
+    context = {'uslugi':uslugi}
+    return HttpResponse(render_to_string('calc.html', context))
+
+def load_calc(request):
+    subuslugi = SubUslugi.objects.get(id=int(request.GET['subuslugi_id']))
+    uslugi_json = [s.as_dict() for s in SubUslugi()]
+    response_data = {
+        'uslugi1': uslugi_json
+    }
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def need_rating(request):
+    uslugi = Uslugi.objects.all()
+    response_data = {}
+    try:
+        response_data['result'] = 'Success'
+        response_data['message'] = list(uslugi)
+    except:
+        response_data['result'] = 'Oh No!'
+        response_data['message'] = 'not correctly'
+
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def current_datetime(request):
+    now = datetime.datetime.now()
+
+    return render(request, 'calc.html', {'now':now})
+
+def hello(request):
+    queryset = Uslugi.objects.all()
+    queryset = serializers.serialize('json', queryset)
+    return HttpResponse(queryset, content_type="application/json")
+
+def home(request):
+    return render_to_response('home.html', {'variable': 'world'})
+
+def calcutta(request):
+    data1 = Uslugi.objects.all()
+    data_json = [s.as_dict() for s in data1]
+    resp_data = {'data1': data_json}
+    return HttpResponse(json.dumps(resp_data), content_type="applcation/json")
+

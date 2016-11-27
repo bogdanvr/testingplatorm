@@ -1,0 +1,21 @@
+
+
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+
+<h1>Hello {{ variable }}, welcome to my awesome site</h1>
+
+<button id="yes">Все получилось</button>
+
+<div id="abxs">Тут будет значение</div>
+<ul class="vfs">
+
+</ul>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'lessons/load_calc.js' %}"></script>
+{% endblock %}
